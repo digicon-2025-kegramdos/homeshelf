@@ -8,14 +8,18 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.StarBorder
+import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.DragHandle // Import DragHandle
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -34,14 +38,40 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.edit
 import com.example.homeshelf.ui.theme.HomeShelfTheme
+import org.json.JSONArray
+import java.util.Collections
 
-// SharedPreferences keys (FocusReadActivity.kt と共通)
-private const val PREFS_NAME = "com.example.homeshelf.favorites"
-private fun getFavoriteKey(comicId: String) = "favorite_$comicId"
+// SharedPreferences key for the ordered list of favorite comics
+private const val PREFS_NAME = "com.example.homeshelf.favorites_prefs"
+private const val KEY_FAVORITE_COMICS_ORDERED = "favorite_comics_ordered"
 
-// 仮の漫画リスト (FocusReadActivity.kt の comicPagesMap のキーを元に作成)
-// 本来は共通のデータソースから取得するのが望ましい
-val allComicIds = listOf("comic1", "comic2", "comic3", "comic4")
+// Helper function to load ordered favorites
+private fun loadOrderedFavorites(context: Context): MutableList<String> {
+    val sharedPrefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    val jsonString = sharedPrefs.getString(KEY_FAVORITE_COMICS_ORDERED, null)
+    val list = mutableListOf<String>()
+    if (jsonString != null) {
+        try {
+            val jsonArray = JSONArray(jsonString)
+            for (i in 0 until jsonArray.length()) {
+                list.add(jsonArray.getString(i))
+            }
+        } catch (e: Exception) {
+            // Handle error or clear corrupted data
+            // For simplicity, we'll return an empty list if parsing fails
+        }
+    }
+    return list
+}
+
+// Helper function to save ordered favorites
+private fun saveOrderedFavorites(context: Context, orderedList: List<String>) {
+    val sharedPrefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    val jsonArray = JSONArray(orderedList)
+    sharedPrefs.edit {
+        putString(KEY_FAVORITE_COMICS_ORDERED, jsonArray.toString())
+    }
+}
 
 
 class SettingsActivity : ComponentActivity() {
@@ -50,7 +80,7 @@ class SettingsActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             HomeShelfTheme {
-                FavoriteSettingsScreen()
+                OrderedFavoriteSettingsScreen()
             }
         }
     }
@@ -58,46 +88,53 @@ class SettingsActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FavoriteSettingsScreen(modifier: Modifier = Modifier) {
+fun OrderedFavoriteSettingsScreen(modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val favoriteComics = remember { mutableStateListOf<String>() }
 
-    // Load favorites from SharedPreferences
     LaunchedEffect(Unit) {
-        val sharedPrefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        val currentFavorites = allComicIds.filter { comicId ->
-            sharedPrefs.getBoolean(getFavoriteKey(comicId), false)
-        }
-        favoriteComics.clear()
-        favoriteComics.addAll(currentFavorites)
+        favoriteComics.addAll(loadOrderedFavorites(context))
     }
 
-    val toggleFavorite = { comicId: String ->
-        val sharedPrefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        val isCurrentlyFavorite = sharedPrefs.getBoolean(getFavoriteKey(comicId), false)
-        sharedPrefs.edit {
-            putBoolean(getFavoriteKey(comicId), !isCurrentlyFavorite)
+    fun updateAndSaveFavorites(newList: List<String>) {
+        favoriteComics.clear()
+        favoriteComics.addAll(newList)
+        saveOrderedFavorites(context, favoriteComics)
+    }
+
+    val onMoveUp = { index: Int ->
+        if (index > 0) {
+            val newList = favoriteComics.toMutableList()
+            Collections.swap(newList, index, index - 1)
+            updateAndSaveFavorites(newList)
         }
-        if (isCurrentlyFavorite) {
-            favoriteComics.remove(comicId)
-        } else {
-            // この画面ではお気に入り追加は主目的ではないが、
-            // 万が一状態が不整合になった場合のために追加しておく
-            if (!favoriteComics.contains(comicId)) {
-                favoriteComics.add(comicId)
-            }
+    }
+
+    val onMoveDown = { index: Int ->
+        if (index < favoriteComics.size - 1) {
+            val newList = favoriteComics.toMutableList()
+            Collections.swap(newList, index, index + 1)
+            updateAndSaveFavorites(newList)
         }
+    }
+
+    val onRemoveFavorite = { comicId: String ->
+        val newList = favoriteComics.toMutableList()
+        newList.remove(comicId)
+        updateAndSaveFavorites(newList)
     }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
-            TopAppBar(title = { Text("お気に入り設定") })
+            TopAppBar(title = { Text("お気に入り順序設定") })
         }
     ) { innerPadding ->
-        Column(modifier = Modifier
-            .padding(innerPadding)
-            .padding(16.dp)) {
+        Column(
+            modifier = Modifier
+                .padding(innerPadding)
+                .padding(16.dp)
+        ) {
             if (favoriteComics.isEmpty()) {
                 Text(
                     text = "お気に入りの漫画はありません。",
@@ -106,11 +143,14 @@ fun FavoriteSettingsScreen(modifier: Modifier = Modifier) {
                 )
             } else {
                 LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    items(favoriteComics.toList()) { comicId -> // toList() でイミュータブルなリストに変換
-                        FavoriteItem(
+                    itemsIndexed(favoriteComics, key = { _, comicId -> comicId }) { index, comicId ->
+                        EditableFavoriteListItem(
                             comicId = comicId,
-                            isFavorite = true, // このリストにあるものは常にお気に入り
-                            onToggleFavorite = { toggleFavorite(comicId) }
+                            index = index,
+                            totalItems = favoriteComics.size,
+                            onMoveUp = { onMoveUp(index) },
+                            onMoveDown = { onMoveDown(index) },
+                            onRemove = { onRemoveFavorite(comicId) }
                         )
                     }
                 }
@@ -120,54 +160,91 @@ fun FavoriteSettingsScreen(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun FavoriteItem(
+fun EditableFavoriteListItem(
     comicId: String,
-    isFavorite: Boolean,
-    onToggleFavorite: () -> Unit,
+    index: Int,
+    totalItems: Int,
+    onMoveUp: () -> Unit,
+    onMoveDown: () -> Unit,
+    onRemove: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
+            .padding(vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+        // horizontalArrangement = Arrangement.SpaceBetween // Adjusted for drag handle
     ) {
-        Text(text = comicId, style = MaterialTheme.typography.bodyLarge) // ここでは漫画IDを表示
-        IconButton(onClick = onToggleFavorite) {
-            Icon(
-                imageVector = if (isFavorite) Icons.Filled.Star else Icons.Filled.StarBorder,
-                contentDescription = if (isFavorite) "お気に入り解除" else "お気に入り登録",
-                tint = if (isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-            )
+        Icon(
+            imageVector = Icons.Filled.DragHandle,
+            contentDescription = "ドラッグして並び替え",
+            modifier = Modifier.padding(end = 8.dp) // Add some padding
+        )
+        Text(text = comicId, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
+        Row {
+            IconButton(onClick = onMoveUp, enabled = index > 0) {
+                Icon(Icons.Filled.ArrowUpward, contentDescription = "上へ移動")
+            }
+            IconButton(onClick = onMoveDown, enabled = index < totalItems - 1) {
+                Icon(Icons.Filled.ArrowDownward, contentDescription = "下へ移動")
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            IconButton(onClick = onRemove) {
+                Icon(Icons.Filled.Delete, contentDescription = "お気に入りから削除", tint = MaterialTheme.colorScheme.error)
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Preview(showBackground = true)
+@Composable
+fun OrderedFavoriteSettingsScreenPreview() {
+    HomeShelfTheme {
+        val sampleFavorites = remember {
+            mutableStateListOf("comic2", "comic1", "comic4")
+        }
+        Scaffold(
+            topBar = { TopAppBar(title = { Text("お気に入り順序設定 (Preview)") }) }
+        ) { padding ->
+            Column(Modifier.padding(padding).padding(16.dp)) {
+                if (sampleFavorites.isEmpty()) {
+                    Text("お気に入りの漫画はありません。")
+                } else {
+                    LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        itemsIndexed(sampleFavorites, key = { _, id -> id}) { index, comicId ->
+                            EditableFavoriteListItem(
+                                comicId = comicId,
+                                index = index,
+                                totalItems = sampleFavorites.size,
+                                onMoveUp = {
+                                    if (index > 0) Collections.swap(sampleFavorites, index, index - 1)
+                                },
+                                onMoveDown = {
+                                     if (index < sampleFavorites.size - 1) Collections.swap(sampleFavorites, index, index + 1)
+                                 },
+                                onRemove = { sampleFavorites.remove(comicId) }
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-fun FavoriteSettingsScreenPreview() {
+fun EditableFavoriteListItemPreview() {
     HomeShelfTheme {
-        // Preview 用のデータで FavoriteSettingsScreen を表示
-        // 簡単のため、ここでは SharedPreferences を直接モックせず、
-        // LaunchedEffect が空のリストを生成するようにします。
-        // より正確なプレビューのためには、SharedPreferences のモックが必要です。
-        FavoriteSettingsScreen()
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun FavoriteItemPreview() {
-    HomeShelfTheme {
-        FavoriteItem(comicId = "comic_preview", isFavorite = true, onToggleFavorite = {})
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun FavoriteItemNotFavoritePreview() {
-    HomeShelfTheme {
-        FavoriteItem(comicId = "comic_preview_not_fav", isFavorite = false, onToggleFavorite = {})
+        EditableFavoriteListItem(
+            comicId = "comic_preview",
+            index = 0,
+            totalItems = 3,
+            onMoveUp = {},
+            onMoveDown = {},
+            onRemove = {}
+        )
     }
 }
