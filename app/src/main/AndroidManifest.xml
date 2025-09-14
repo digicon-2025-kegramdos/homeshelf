@@ -11,6 +11,12 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.HomeShelf">
+        <activity
+            android:name=".FocusReadActivity"
+            android:exported="true"
+            android:label="@string/title_activity_focus_read"
+            android:theme="@style/Theme.HomeShelf" />
+
         <receiver
             android:name=".ComicsWidget"
             android:exported="false">

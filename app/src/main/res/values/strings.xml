@@ -5,4 +5,5 @@
     <string name="app_widget_description">Pinned Comics List</string>
     <string name="widget_empty_text">No comics</string>
     <string name="comic_icon_description">Icon of comic</string>
+    <string name="title_activity_focus_read">FocusReadActivity</string>
 </resources>
