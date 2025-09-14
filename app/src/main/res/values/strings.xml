@@ -7,4 +7,5 @@
     <string name="comic_icon_description">Icon of comic</string>
     <string name="widget_button_left_description">previous page</string>
     <string name="widget_button_right_description">next page</string>
+    <string name="title_activity_focus_read">FocusReadActivity</string>
 </resources>
