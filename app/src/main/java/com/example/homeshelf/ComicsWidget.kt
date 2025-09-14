@@ -96,21 +96,22 @@ class ComicsWidget : AppWidgetProvider() {
 
         if (intent?.action == ACTION_LEFTBUTTON) {
             val views = RemoteViews(context.packageName, R.layout.comics_widget).apply {
-//                setInt(R.id.appwidget_itemlist_flipper, "setInAnimation", R.anim.in_from_left)
-//                setInt(R.id.appwidget_itemlist_flipper, "setOutAnimation", R.anim.out_to_right)
-//                setDisplayedChild(R.id.appwidget_itemlist_flipper, 0)
+                setInt(R.id.appwidget_itemlist_flipper, "setInAnimation", R.anim.in_from_left)
+                setInt(R.id.appwidget_itemlist_flipper, "setOutAnimation", R.anim.out_to_right)
+                setDisplayedChild(R.id.appwidget_itemlist_flipper, 0)
             }
 
             updateWidget(context, views)
-        }
-        if (intent?.action == ACTION_RIGHTBUTTON) {
+        } else if (intent?.action == ACTION_RIGHTBUTTON) {
             val views = RemoteViews(context.packageName, R.layout.comics_widget).apply {
 //                setInt(R.id.appwidget_itemlist_flipper, "setInAnimation", R.anim.in_from_right)
 //                setInt(R.id.appwidget_itemlist_flipper, "setOutAnimation", R.anim.out_to_left)
-//                setDisplayedChild(R.id.appwidget_itemlist_flipper, 2)
+                setDisplayedChild(R.id.appwidget_itemlist_flipper, 2)
             }
 
             updateWidget(context, views)
+        } else {
+            super.onReceive(context, intent)
         }
     }
 
