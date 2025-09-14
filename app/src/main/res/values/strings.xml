@@ -3,4 +3,6 @@
     <string name="appwidget_text">EXAMPLE</string>
     <string name="add_widget">Add widget</string>
     <string name="app_widget_description">Pinned Comics List</string>
+    <string name="widget_empty_text">No comics</string>
+    <string name="comic_icon_description">Icon of comic</string>
 </resources>
