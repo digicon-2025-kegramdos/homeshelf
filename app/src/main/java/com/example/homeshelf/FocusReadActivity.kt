@@ -44,13 +44,17 @@ class FocusReadActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        // IntentからCOMIC_IDを取得。見つからない場合はデフォルト値（例: "comic1"）を使用
+        val comicId = intent.getStringExtra("COMIC_ID") ?: "comic1"
+
         setContent {
             HomeShelfTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     ComicScreen(
-                        name = "Android",
+                        name = comicId, // 受け取ったcomicIdを渡す
                         modifier = Modifier.padding(innerPadding),
-                        isFocusMode = false
+                        isFocusMode = false // 必要に応じてisFocusModeもIntentで渡すように変更可能
                     )
                 }
             }
@@ -61,17 +65,32 @@ class FocusReadActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ComicScreen(name: String, modifier: Modifier = Modifier, isFocusMode: Boolean = false) {
-    val pages = listOf(
-        R.drawable.comic_1,
-        R.drawable.comic_2,
-        R.drawable.comic_3
+    // 各漫画のページリソースIDのリストを定義
+    val comicPagesMap = mapOf(
+        "comic1" to listOf(R.drawable.comic_1_1),
+        "comic2" to listOf(R.drawable.comic_2_1, R.drawable.comic_2_2, R.drawable.comic_2_3, R.drawable.comic_2_4),
+        "comic3" to listOf(R.drawable.comic_3_1),
+        "comic4" to listOf(R.drawable.comic_4_1, R.drawable.comic_4_2, R.drawable.comic_4_3)
     )
+
+    // name引数に基づいて表示するページリストを選択
+    // マップに存在しない場合は、最初の漫画を表示するか、空のリストを使用
+    val pages = comicPagesMap[name] ?: comicPagesMap.values.firstOrNull() ?: emptyList()
+
+    if (pages.isEmpty()) {
+        // ページが見つからない場合の処理（例: エラーメッセージ表示）
+        Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text("漫画「$name」のページが見つかりません。")
+        }
+        return
+    }
+
     var isOverlayVisible by remember { mutableStateOf(false) }
     val pagerState = rememberPagerState(pageCount = { pages.size })
     val context = LocalContext.current
 
     Box(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize(), // modifier パラメータをBoxのトップレベルに適用
         contentAlignment = Alignment.Center
     ) {
         HorizontalPager(
@@ -104,11 +123,10 @@ fun ComicScreen(name: String, modifier: Modifier = Modifier, isFocusMode: Boolea
             actions = {
                 if (!isFocusMode) {
                     IconButton(onClick = {
-                        // 共有したいURL（ダミー）
-                        val urlToShare = "https://example.com"
+                        val urlToShare = "https://example.com" // 共有する内容に応じて変更
                         val sendIntent = Intent().apply {
                             action = Intent.ACTION_SEND
-                            putExtra(Intent.EXTRA_TEXT, urlToShare)
+                            putExtra(Intent.EXTRA_TEXT, "漫画「$name」を読んでいます！ $urlToShare")
                             type = "text/plain"
                         }
                         val shareIntent = Intent.createChooser(sendIntent, null)
@@ -116,7 +134,7 @@ fun ComicScreen(name: String, modifier: Modifier = Modifier, isFocusMode: Boolea
                     }) {
                         Icon(imageVector = Icons.Default.Share, contentDescription = "共有")
                     }
-                    IconButton(onClick = { /*TODO*/ }) { Icon(imageVector = Icons.Default.Star, contentDescription = "お気に入り") }
+                    IconButton(onClick = { /*TODO: お気に入り機能の実装*/ }) { Icon(imageVector = Icons.Default.Star, contentDescription = "お気に入り") }
                 }
             },
             colors = TopAppBarDefaults.topAppBarColors(
@@ -135,6 +153,7 @@ fun ComicScreen(name: String, modifier: Modifier = Modifier, isFocusMode: Boolea
 @Composable
 fun GreetingPreview() {
     HomeShelfTheme {
-        ComicScreen("Android")
+        // プレビューで表示する漫画のIDを指定
+        ComicScreen("comic2")
     }
 }
