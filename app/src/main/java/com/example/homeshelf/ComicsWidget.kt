@@ -151,6 +151,9 @@ class ComicsWidget : AppWidgetProvider() {
                 // It must be in the same layout used to instantiate the
                 // RemoteViews object.
                 setEmptyView(R.id.appwidget_itemlist, R.id.appwidget_empty_view)
+
+                setImageViewResource(R.id.widget_button_left, R.drawable.ic_button_left)
+                setImageViewResource(R.id.widget_button_right, R.drawable.ic_button_right)
             }
 
             appWidgetManager.updateAppWidget(appWidgetId, views)

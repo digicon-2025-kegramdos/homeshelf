@@ -38,18 +38,14 @@
                 android:layout_width="0dp"
                 android:layout_height="48dp"
                 android:layout_weight="1"
-                android:contentDescription="@string/widget_button_left_description"
-                app:srcCompat="@drawable/ic_button_left"
-                tools:srcCompat="@drawable/ic_button_left" />
+                android:contentDescription="@string/widget_button_left_description" />
 
             <ImageButton
                 android:id="@+id/widget_button_right"
                 android:layout_width="0dp"
                 android:layout_height="48dp"
                 android:layout_weight="1"
-                android:contentDescription="@string/widget_button_right_description"
-                app:srcCompat="@drawable/ic_button_right"
-                tools:srcCompat="@drawable/ic_button_right" />
+                android:contentDescription="@string/widget_button_right_description" />
 
         </LinearLayout>
 
