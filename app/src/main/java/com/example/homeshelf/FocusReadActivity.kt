@@ -1,5 +1,6 @@
 package com.example.homeshelf
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -19,6 +20,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.StarOutline // Outlined star icon
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -28,6 +30,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,6 +41,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.content.edit // Import for SharedPreferences KTX extension
 import com.example.homeshelf.ui.theme.HomeShelfTheme
 
 class FocusReadActivity : ComponentActivity() {
@@ -45,16 +49,15 @@ class FocusReadActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        // IntentからCOMIC_IDを取得。見つからない場合はデフォルト値（例: "comic1"）を使用
         val comicId = intent.getStringExtra("COMIC_ID") ?: "comic1"
 
         setContent {
             HomeShelfTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     ComicScreen(
-                        name = comicId, // 受け取ったcomicIdを渡す
+                        name = comicId,
                         modifier = Modifier.padding(innerPadding),
-                        isFocusMode = false // 必要に応じてisFocusModeもIntentで渡すように変更可能
+                        isFocusMode = false
                     )
                 }
             }
@@ -62,10 +65,13 @@ class FocusReadActivity : ComponentActivity() {
     }
 }
 
+// SharedPreferences keys
+private const val PREFS_NAME = "com.example.homeshelf.favorites"
+private fun getFavoriteKey(comicId: String) = "favorite_$comicId"
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ComicScreen(name: String, modifier: Modifier = Modifier, isFocusMode: Boolean = false) {
-    // 各漫画のページリソースIDのリストを定義
     val comicPagesMap = mapOf(
         "comic1" to listOf(R.drawable.comic_1_1),
         "comic2" to listOf(R.drawable.comic_2_1, R.drawable.comic_2_2, R.drawable.comic_2_3, R.drawable.comic_2_4),
@@ -73,12 +79,9 @@ fun ComicScreen(name: String, modifier: Modifier = Modifier, isFocusMode: Boolea
         "comic4" to listOf(R.drawable.comic_4_1, R.drawable.comic_4_2, R.drawable.comic_4_3)
     )
 
-    // name引数に基づいて表示するページリストを選択
-    // マップに存在しない場合は、最初の漫画を表示するか、空のリストを使用
     val pages = comicPagesMap[name] ?: comicPagesMap.values.firstOrNull() ?: emptyList()
 
     if (pages.isEmpty()) {
-        // ページが見つからない場合の処理（例: エラーメッセージ表示）
         Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text("漫画「$name」のページが見つかりません。")
         }
@@ -89,8 +92,28 @@ fun ComicScreen(name: String, modifier: Modifier = Modifier, isFocusMode: Boolea
     val pagerState = rememberPagerState(pageCount = { pages.size })
     val context = LocalContext.current
 
+    // Favorite state
+    var isFavorite by remember { mutableStateOf(false) }
+
+    // Load initial favorite state
+    LaunchedEffect(name) {
+        val sharedPrefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        isFavorite = sharedPrefs.getBoolean(getFavoriteKey(name), false)
+    }
+
+    // Function to toggle favorite state
+    val toggleFavorite: () -> Unit = {
+        val newFavoriteState = !isFavorite
+        isFavorite = newFavoriteState
+        val sharedPrefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        sharedPrefs.edit {
+            putBoolean(getFavoriteKey(name), newFavoriteState)
+            // apply() is called automatically by the KTX extension
+        }
+    }
+
     Box(
-        modifier = modifier.fillMaxSize(), // modifier パラメータをBoxのトップレベルに適用
+        modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
         HorizontalPager(
@@ -123,7 +146,7 @@ fun ComicScreen(name: String, modifier: Modifier = Modifier, isFocusMode: Boolea
             actions = {
                 if (!isFocusMode) {
                     IconButton(onClick = {
-                        val urlToShare = "https://example.com" // 共有する内容に応じて変更
+                        val urlToShare = "https://example.com"
                         val sendIntent = Intent().apply {
                             action = Intent.ACTION_SEND
                             putExtra(Intent.EXTRA_TEXT, "漫画「$name」を読んでいます！ $urlToShare")
@@ -134,7 +157,13 @@ fun ComicScreen(name: String, modifier: Modifier = Modifier, isFocusMode: Boolea
                     }) {
                         Icon(imageVector = Icons.Default.Share, contentDescription = "共有")
                     }
-                    IconButton(onClick = { /*TODO: お気に入り機能の実装*/ }) { Icon(imageVector = Icons.Default.Star, contentDescription = "お気に入り") }
+                    IconButton(onClick = toggleFavorite) { // Use the toggle function
+                        Icon(
+                            imageVector = if (isFavorite) Icons.Filled.Star else Icons.Outlined.StarOutline,
+                            contentDescription = "お気に入り",
+                            tint = if (isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
             },
             colors = TopAppBarDefaults.topAppBarColors(
@@ -153,7 +182,6 @@ fun ComicScreen(name: String, modifier: Modifier = Modifier, isFocusMode: Boolea
 @Composable
 fun GreetingPreview() {
     HomeShelfTheme {
-        // プレビューで表示する漫画のIDを指定
         ComicScreen("comic2")
     }
 }
