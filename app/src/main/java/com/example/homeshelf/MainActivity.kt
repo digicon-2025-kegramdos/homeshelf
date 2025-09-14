@@ -38,12 +38,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-//        setContentView(R.layout.activity_main)
-//        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-//            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-//            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-//            insets
-//        }
         setContent {
             HomeShelfTheme {
                 Surface(
@@ -68,7 +62,7 @@ fun MainScreen(modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val thumbnails = listOf(
         Thumbnail(R.drawable.thumbnail1, "きなのはテロの道具じゃない！", "kegra"),
-        Thumbnail(R.drawable.thumbnail2, "pika_testの反撃", "kegra"),
+        Thumbnail(R.drawable.thumbnail2, "pika_testの消失", "kegra"),
         Thumbnail(R.drawable.thumbnail3, "I can flyなんですよ", "kegra"),
         Thumbnail(R.drawable.thumbnail4, "traPへようこそ！", "kegra"),
         )
@@ -82,7 +76,9 @@ fun MainScreen(modifier: Modifier = Modifier) {
     ) {
         Text("HomeShelf", style = MaterialTheme.typography.headlineLarge, textAlign = TextAlign.Center, modifier = Modifier.padding(24.dp))
         thumbnails.forEach { thumbnail ->
-            Column() {
+            Column(
+                modifier = Modifier.padding(8.dp),
+            ) {
                 Image(
                     painter = painterResource(id = thumbnail.imageRes),
                     contentDescription = null, // Provide a meaningful description if needed
