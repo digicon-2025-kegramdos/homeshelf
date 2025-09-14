@@ -35,16 +35,20 @@
 
             <ImageButton
                 android:id="@+id/widget_button_left"
+                style="@android:style/Widget.Material.ImageButton"
                 android:layout_width="0dp"
                 android:layout_height="48dp"
                 android:layout_weight="1"
+                android:background="@android:color/transparent"
                 android:contentDescription="@string/widget_button_left_description" />
 
             <ImageButton
                 android:id="@+id/widget_button_right"
+                style="@android:style/Widget.Material.ImageButton"
                 android:layout_width="0dp"
                 android:layout_height="48dp"
                 android:layout_weight="1"
+                android:background="@android:color/transparent"
                 android:contentDescription="@string/widget_button_right_description" />
 
         </LinearLayout>
