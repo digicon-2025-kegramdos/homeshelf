@@ -12,20 +12,74 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-
-        <TextView
-            android:id="@+id/appwidget_empty_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/widget_empty_text"
-            android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
-
-        <ListView
-            android:id="@+id/appwidget_itemlist"
+        <ViewFlipper
+            android:id="@+id/appwidget_itemlist_flipper"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1" />
+            android:layout_gravity=""
+            android:layout_weight="1"
+            android:inAnimation="@anim/in_from_right"
+            android:outAnimation="@anim/out_to_left">
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/appwidget_empty_view_prev"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/widget_empty_text"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+
+                <ListView
+                    android:id="@+id/appwidget_itemlist_prev"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/appwidget_empty_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/widget_empty_text"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+
+                <ListView
+                    android:id="@+id/appwidget_itemlist"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/appwidget_empty_view_next"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/widget_empty_text"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+
+                <ListView
+                    android:id="@+id/appwidget_itemlist_next"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
+            </LinearLayout>
+
+        </ViewFlipper>
 
         <LinearLayout
             android:layout_width="match_parent"

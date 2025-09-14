@@ -3,11 +3,13 @@ package com.example.homeshelf
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.util.Log
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
+import android.widget.ViewFlipper
 import androidx.core.net.toUri
 
 
@@ -88,14 +90,27 @@ const val ACTION_RIGHTBUTTON = "WIDGET_RIGHTBUTTON_CLICKED"
 class ComicsWidget : AppWidgetProvider() {
     override fun onReceive(context: Context?, intent: Intent?) {
         super.onReceive(context, intent)
-        if(intent == null)
+
+        if(context == null)
             return
 
-        if (intent.action == ACTION_LEFTBUTTON) {
-            Log.i("MyApp", "leftbutton")
+        if (intent?.action == ACTION_LEFTBUTTON) {
+            val views = RemoteViews(context.packageName, R.layout.comics_widget).apply {
+//                setInt(R.id.appwidget_itemlist_flipper, "setInAnimation", R.anim.in_from_left)
+//                setInt(R.id.appwidget_itemlist_flipper, "setOutAnimation", R.anim.out_to_right)
+//                setDisplayedChild(R.id.appwidget_itemlist_flipper, 0)
+            }
+
+            updateWidget(context, views)
         }
-        if (intent.action == ACTION_RIGHTBUTTON) {
-            Log.i("MyApp", "rightbutton")
+        if (intent?.action == ACTION_RIGHTBUTTON) {
+            val views = RemoteViews(context.packageName, R.layout.comics_widget).apply {
+//                setInt(R.id.appwidget_itemlist_flipper, "setInAnimation", R.anim.in_from_right)
+//                setInt(R.id.appwidget_itemlist_flipper, "setOutAnimation", R.anim.out_to_left)
+//                setDisplayedChild(R.id.appwidget_itemlist_flipper, 2)
+            }
+
+            updateWidget(context, views)
         }
     }
 
@@ -150,6 +165,8 @@ class ComicsWidget : AppWidgetProvider() {
 
                 setImageViewResource(R.id.widget_button_right, R.drawable.ic_button_right)
                 setOnClickPendingIntent(R.id.widget_button_right, rightButtonPendingIntent)
+
+                setDisplayedChild(R.id.appwidget_itemlist_flipper, 1)
             }
 
             appWidgetManager.updateAppWidget(appWidgetId, views)
@@ -163,5 +180,19 @@ class ComicsWidget : AppWidgetProvider() {
 
     override fun onDisabled(context: Context) {
         // Enter relevant functionality for when the last widget is disabled
+    }
+}
+
+private fun updateWidget(context: Context, views: RemoteViews) {
+    val appWidgetManager = AppWidgetManager.getInstance(context)
+    val appWidgetIds = appWidgetManager.getAppWidgetIds(
+        ComponentName(
+            context,
+            ComicsWidget::class.java
+        )
+    )
+    for (appWidgetId in appWidgetIds) {
+        Log.i("MyApp", appWidgetId.toString())
+        appWidgetManager.updateAppWidget(appWidgetId, views)
     }
 }
