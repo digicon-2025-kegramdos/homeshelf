@@ -18,6 +18,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -48,7 +49,8 @@ class FocusReadActivity : ComponentActivity() {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     ComicScreen(
                         name = "Android",
-                        modifier = Modifier.padding(innerPadding)
+                        modifier = Modifier.padding(innerPadding),
+                        isFocusMode = false
                     )
                 }
             }
@@ -58,7 +60,7 @@ class FocusReadActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ComicScreen(name: String, modifier: Modifier = Modifier) {
+fun ComicScreen(name: String, modifier: Modifier = Modifier, isFocusMode: Boolean = false) {
     val pages = listOf(
         R.drawable.comic_1,
         R.drawable.comic_2,
@@ -100,18 +102,21 @@ fun ComicScreen(name: String, modifier: Modifier = Modifier) {
         TopAppBar(
             title = { Text(text = "ページ ${pagerState.currentPage + 1}/${pages.size}") },
             actions = {
-                IconButton(onClick = {
-                    // 共有したいURL（ダミー）
-                    val urlToShare = "https://example.com"
-                    val sendIntent = Intent().apply {
-                        action = Intent.ACTION_SEND
-                        putExtra(Intent.EXTRA_TEXT, urlToShare)
-                        type = "text/plain"
+                if (!isFocusMode) {
+                    IconButton(onClick = {
+                        // 共有したいURL（ダミー）
+                        val urlToShare = "https://example.com"
+                        val sendIntent = Intent().apply {
+                            action = Intent.ACTION_SEND
+                            putExtra(Intent.EXTRA_TEXT, urlToShare)
+                            type = "text/plain"
+                        }
+                        val shareIntent = Intent.createChooser(sendIntent, null)
+                        context.startActivity(shareIntent)
+                    }) {
+                        Icon(imageVector = Icons.Default.Share, contentDescription = "共有")
                     }
-                    val shareIntent = Intent.createChooser(sendIntent, null)
-                    context.startActivity(shareIntent)
-                }) {
-                    Icon(imageVector = Icons.Default.Share, contentDescription = "共有")
+                    IconButton(onClick = { /*TODO*/ }) { Icon(imageVector = Icons.Default.Star, contentDescription = "お気に入り") }
                 }
             },
             colors = TopAppBarDefaults.topAppBarColors(
