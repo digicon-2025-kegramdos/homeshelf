@@ -1,5 +1,6 @@
 package com.example.homeshelf
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -33,6 +34,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.homeshelf.ui.theme.HomeShelfTheme
@@ -64,6 +66,7 @@ fun ComicScreen(name: String, modifier: Modifier = Modifier) {
     )
     var isOverlayVisible by remember { mutableStateOf(false) }
     val pagerState = rememberPagerState(pageCount = { pages.size })
+    val context = LocalContext.current
 
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -71,7 +74,8 @@ fun ComicScreen(name: String, modifier: Modifier = Modifier) {
     ) {
         HorizontalPager(
             state = pagerState,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null
@@ -96,7 +100,17 @@ fun ComicScreen(name: String, modifier: Modifier = Modifier) {
         TopAppBar(
             title = { Text(text = "ページ ${pagerState.currentPage + 1}/${pages.size}") },
             actions = {
-                IconButton(onClick = { /* TODO: 共有処理をここに書く */ }) {
+                IconButton(onClick = {
+                    // 共有したいURL（ダミー）
+                    val urlToShare = "https://example.com"
+                    val sendIntent = Intent().apply {
+                        action = Intent.ACTION_SEND
+                        putExtra(Intent.EXTRA_TEXT, urlToShare)
+                        type = "text/plain"
+                    }
+                    val shareIntent = Intent.createChooser(sendIntent, null)
+                    context.startActivity(shareIntent)
+                }) {
                     Icon(imageVector = Icons.Default.Share, contentDescription = "共有")
                 }
             },
@@ -108,10 +122,11 @@ fun ComicScreen(name: String, modifier: Modifier = Modifier) {
 }
 
 
-
-@Preview(showBackground = true,
+@Preview(
+    showBackground = true,
     widthDp = 480,
-    heightDp = 960)
+    heightDp = 960
+)
 @Composable
 fun GreetingPreview() {
     HomeShelfTheme {
