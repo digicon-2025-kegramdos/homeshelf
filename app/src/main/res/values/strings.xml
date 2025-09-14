@@ -5,4 +5,6 @@
     <string name="app_widget_description">Pinned Comics List</string>
     <string name="widget_empty_text">No comics</string>
     <string name="comic_icon_description">Icon of comic</string>
+    <string name="widget_button_left_description">previous page</string>
+    <string name="widget_button_right_description">next page</string>
 </resources>
