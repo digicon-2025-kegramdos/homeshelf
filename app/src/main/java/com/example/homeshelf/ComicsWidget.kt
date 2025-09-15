@@ -12,11 +12,23 @@ import android.widget.RemoteViews
 import android.widget.RemoteViewsService
 import androidx.core.net.toUri
 
-const val EXTRA_ITEM = "com.example.homeshelf.EXTRA_ITEM"
+const val EXTRA_ITEM = "com.example.homeshelf.comics_widget.EXTRA_ITEM"
 
 const val ACTION_LEFTBUTTON = "WIDGET_LEFTBUTTON_CLICKED"
 const val ACTION_RIGHTBUTTON = "WIDGET_RIGHTBUTTON_CLICKED"
 const val ACTION_LISTITEM_TAPPED = "WIDGET_LISTITEM_TAPPED"
+
+fun updateComicWidget(context: Context) {
+    val appWidgetManager = AppWidgetManager.getInstance(context)
+    val componentName = ComponentName(context, ComicsWidget::class.java)
+    val appWidgetIds = appWidgetManager.getAppWidgetIds(componentName)
+
+    val intent = Intent(context, ComicsWidget::class.java).apply {
+        action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+        putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, appWidgetIds)
+    }
+    context.sendBroadcast(intent)
+}
 
 class ListWidgetService : RemoteViewsService() {
 
@@ -136,6 +148,7 @@ class ComicsWidget : AppWidgetProvider() {
                 AppWidgetManager.EXTRA_APPWIDGET_ID,
                 AppWidgetManager.INVALID_APPWIDGET_ID)
             val viewIndex: Int = intent.getIntExtra(EXTRA_ITEM, -1)
+            Log.i("MyApp", "tap: ${viewIndex}")
 
             val intent = Intent(context, FocusReadActivity::class.java).apply {
                 putExtra("COMIC_ID", "comic1") // comicIdをIntentに追加
