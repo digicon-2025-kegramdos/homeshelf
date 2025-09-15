@@ -12,6 +12,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.HomeShelf">
         <activity
+            android:name=".ReadActivity"
+            android:exported="false"
+            android:label="@string/title_activity_read"
+            android:theme="@style/Theme.HomeShelf" />
+        <activity
             android:name=".SettingsActivity"
             android:exported="false"
             android:label="@string/title_activity_settings"
