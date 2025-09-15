@@ -149,10 +149,9 @@ class ComicsWidget : AppWidgetProvider() {
                 AppWidgetManager.EXTRA_APPWIDGET_ID,
                 AppWidgetManager.INVALID_APPWIDGET_ID)
             val viewIndex: Int = intent.getIntExtra(EXTRA_ITEM, -1)
-            Log.i("MyApp", "tap: ${viewIndex}")
 
             val intent = Intent(context, FocusReadActivity::class.java).apply {
-                putExtra("COMIC_ID", "comic1") // comicIdをIntentに追加
+                putExtra("COMIC_ID", "comic${viewIndex}")
                 setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
             context.startActivity(intent)
@@ -205,7 +204,7 @@ class ComicsWidget : AppWidgetProvider() {
                 putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
                 data = toUri(Intent.URI_INTENT_SCHEME).toUri()
 
-                PendingIntent.getBroadcast(context, 0, this, PendingIntent.FLAG_IMMUTABLE)
+                PendingIntent.getBroadcast(context, 0, this, PendingIntent.FLAG_MUTABLE)
             }
             val views = RemoteViews(context.packageName, R.layout.comics_widget).apply {
                 setListViewContent(context, this, appWidgetId, R.id.appwidget_itemlist_prev, R.id.appwidget_empty_view_prev)
