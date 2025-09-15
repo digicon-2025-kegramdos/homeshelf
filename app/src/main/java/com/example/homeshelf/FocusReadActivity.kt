@@ -123,14 +123,18 @@ class FocusReadActivity : ComponentActivity() {
 @Composable
 fun ComicScreen(comicId: String, modifier: Modifier = Modifier, isFocusMode: Boolean = false) {
     val comicPagesMap = mapOf(
-        "comic1" to listOf(R.drawable.comic_1_1),
+        "comic1" to listOf(R.drawable.comic_1_1,R.drawable.comic_1_2),
         "comic2" to listOf(
             R.drawable.comic_2_1,
             R.drawable.comic_2_2,
             R.drawable.comic_2_3,
-            R.drawable.comic_2_4
+            R.drawable.comic_2_4,
+            R.drawable.comic_2_5,
+            R.drawable.comic_2_6,
+            R.drawable.comic_2_7,
+            R.drawable.comic_2_8
         ),
-        "comic3" to listOf(R.drawable.comic_3_1),
+        "comic3" to listOf(R.drawable.comic_3_1,R.drawable.comic_3_2),
         "comic4" to listOf(R.drawable.comic_4_1, R.drawable.comic_4_2, R.drawable.comic_4_3)
     )
 
