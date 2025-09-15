@@ -61,16 +61,16 @@ data class Thumbnail(
     val comicId: String // 漫画のIDを追加
 )
 
+val thumbnails = listOf(
+    Thumbnail(R.drawable.thumbnail1, "きなのはテロの道具じゃない！", "kegra", "comic1"),
+    Thumbnail(R.drawable.thumbnail2, "pika_testの消失", "kegra", "comic2"),
+    Thumbnail(R.drawable.thumbnail3, "I can flyなんですよ", "kegra", "comic3"),
+    Thumbnail(R.drawable.thumbnail4, "traPへようこそ！", "kegra", "comic4"),
+)
+
 @Composable
 fun MainScreen(modifier: Modifier = Modifier) {
     val context = LocalContext.current
-    // 各サムネイルにcomicIdを割り当て
-    val thumbnails = listOf(
-        Thumbnail(R.drawable.thumbnail1, "きなのはテロの道具じゃない！", "kegra", "comic1"),
-        Thumbnail(R.drawable.thumbnail2, "pika_testの消失", "kegra", "comic2"),
-        Thumbnail(R.drawable.thumbnail3, "I can flyなんですよ", "kegra", "comic3"),
-        Thumbnail(R.drawable.thumbnail4, "traPへようこそ！", "kegra", "comic4"),
-    )
 
     Scaffold(
         bottomBar = {

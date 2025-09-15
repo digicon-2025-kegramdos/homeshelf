@@ -57,8 +57,6 @@ private fun loadOrderedFavorites(context: Context): MutableList<String> {
                 list.add(jsonArray.getString(i))
             }
         } catch (e: Exception) {
-            // Handle error or clear corrupted data
-            // For simplicity, we'll return an empty list if parsing fails
         }
     }
     return list
@@ -73,6 +71,15 @@ private fun saveOrderedFavorites(context: Context, orderedList: List<String>) {
     }
 }
 
+// Helper function to get titles of favorite comics
+fun getFavoriteComicTitles(context: Context): List<String> {
+    val favoriteComicIds = loadOrderedFavorites(context)
+    val allThumbnails = com.example.homeshelf.thumbnails // MainActivity.kt の thumbnails を参照
+    
+    return favoriteComicIds.mapNotNull { favId ->
+        allThumbnails.find { it.comicId == favId }?.title
+    }
+}
 
 class SettingsActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -94,6 +101,9 @@ fun OrderedFavoriteSettingsScreen(modifier: Modifier = Modifier) {
 
     LaunchedEffect(Unit) {
         favoriteComics.addAll(loadOrderedFavorites(context))
+        // Example of how to use getFavoriteComicTitles:
+        // val favoriteTitles = getFavoriteComicTitles(context)
+        // Log.d("FavoriteTitles", favoriteTitles.joinToString())
     }
 
     fun updateAndSaveFavorites(newList: List<String>) {
@@ -124,7 +134,7 @@ fun OrderedFavoriteSettingsScreen(modifier: Modifier = Modifier) {
         newList.remove(comicId)
         updateAndSaveFavorites(newList)
     }
-
+    
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
@@ -145,13 +155,15 @@ fun OrderedFavoriteSettingsScreen(modifier: Modifier = Modifier) {
             } else {
                 LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     itemsIndexed(favoriteComics, key = { _, comicId -> comicId }) { index, comicId ->
+                        // Display comic title instead of ID if available
+                        val comicTitle = com.example.homeshelf.thumbnails.find { it.comicId == comicId }?.title ?: comicId
                         EditableFavoriteListItem(
-                            comicId = comicId,
+                            comicId = comicTitle, // Display title
                             index = index,
                             totalItems = favoriteComics.size,
                             onMoveUp = { onMoveUp(index) },
                             onMoveDown = { onMoveDown(index) },
-                            onRemove = { onRemoveFavorite(comicId) }
+                            onRemove = { onRemoveFavorite(comicId) } // Pass original comicId for removal
                         )
                     }
                 }
@@ -162,7 +174,7 @@ fun OrderedFavoriteSettingsScreen(modifier: Modifier = Modifier) {
 
 @Composable
 fun EditableFavoriteListItem(
-    comicId: String,
+    comicId: String, // This will now be the title for display
     index: Int,
     totalItems: Int,
     onMoveUp: () -> Unit,
@@ -182,7 +194,7 @@ fun EditableFavoriteListItem(
             contentDescription = "ドラッグして並び替え",
             modifier = Modifier.padding(end = 8.dp) // Add some padding
         )
-        Text(text = comicId, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
+        Text(text = comicId, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f)) // Displaying title
         Row {
             IconButton(onClick = onMoveUp, enabled = index > 0) {
                 Icon(Icons.Filled.ArrowUpward, contentDescription = "上へ移動")
@@ -203,29 +215,36 @@ fun EditableFavoriteListItem(
 @Composable
 fun OrderedFavoriteSettingsScreenPreview() {
     HomeShelfTheme {
-        val sampleFavorites = remember {
+        // Mocking thumbnails for preview context
+        val sampleThumbnails = listOf(
+            com.example.homeshelf.Thumbnail(0, "Comic Title 2", "", "comic2"),
+            com.example.homeshelf.Thumbnail(0, "Comic Title 1", "", "comic1"),
+            com.example.homeshelf.Thumbnail(0, "Comic Title 4", "", "comic4")
+        )
+        val sampleFavoriteIds = remember {
             mutableStateListOf("comic2", "comic1", "comic4")
         }
         Scaffold(
             topBar = { TopAppBar(title = { Text("お気に入り順序設定 (Preview)") }) }
         ) { padding ->
             Column(Modifier.padding(padding).padding(16.dp)) {
-                if (sampleFavorites.isEmpty()) {
+                if (sampleFavoriteIds.isEmpty()) {
                     Text("お気に入りの漫画はありません。")
                 } else {
                     LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        itemsIndexed(sampleFavorites, key = { _, id -> id}) { index, comicId ->
+                        itemsIndexed(sampleFavoriteIds, key = { _, id -> id}) { index, comicId ->
+                             val comicTitle = sampleThumbnails.find { it.comicId == comicId }?.title ?: comicId
                             EditableFavoriteListItem(
-                                comicId = comicId,
+                                comicId = comicTitle,
                                 index = index,
-                                totalItems = sampleFavorites.size,
+                                totalItems = sampleFavoriteIds.size,
                                 onMoveUp = {
-                                    if (index > 0) Collections.swap(sampleFavorites, index, index - 1)
+                                    if (index > 0) Collections.swap(sampleFavoriteIds, index, index - 1)
                                 },
                                 onMoveDown = {
-                                     if (index < sampleFavorites.size - 1) Collections.swap(sampleFavorites, index, index + 1)
+                                     if (index < sampleFavoriteIds.size - 1) Collections.swap(sampleFavoriteIds, index, index + 1)
                                  },
-                                onRemove = { sampleFavorites.remove(comicId) }
+                                onRemove = { sampleFavoriteIds.remove(comicId) }
                             )
                         }
                     }
@@ -240,7 +259,7 @@ fun OrderedFavoriteSettingsScreenPreview() {
 fun EditableFavoriteListItemPreview() {
     HomeShelfTheme {
         EditableFavoriteListItem(
-            comicId = "comic_preview",
+            comicId = "Sample Comic Title", // Displaying title
             index = 0,
             totalItems = 3,
             onMoveUp = {},
