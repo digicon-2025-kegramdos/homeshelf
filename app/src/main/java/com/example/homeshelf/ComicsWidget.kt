@@ -66,6 +66,7 @@ class ListRemoteViewsFactory(
 
     override fun getViewAt(position: Int): RemoteViews {
         val titles = getFavoriteComicTitles(context)
+        val ids = getFavoriteComicIds(context)
 
         // Construct a remote views item based on the widget item XML file
         // and set the text based on the position.
@@ -77,7 +78,7 @@ class ListRemoteViewsFactory(
             // that is set on the collection view in StackWidgetProvider.
             val fillInIntent = Intent().apply {
                 Bundle().also { extras ->
-                    extras.putString(EXTRA_ITEM, "comic${position + 1}")
+                    extras.putString(EXTRA_ITEM, ids.get(position))
                     putExtras(extras)
                 }
             }

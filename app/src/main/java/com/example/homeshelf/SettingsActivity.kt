@@ -81,6 +81,15 @@ fun getFavoriteComicTitles(context: Context): List<String> {
     }
 }
 
+fun getFavoriteComicIds(context: Context): List<String> {
+    val favoriteComicIds = loadOrderedFavorites(context)
+    val allThumbnails = com.example.homeshelf.thumbnails // MainActivity.kt の thumbnails を参照
+
+    return favoriteComicIds.mapNotNull { favId ->
+        allThumbnails.find { it.comicId == favId }?.comicId
+    }
+}
+
 class SettingsActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
