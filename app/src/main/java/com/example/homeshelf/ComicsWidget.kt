@@ -9,7 +9,6 @@ import android.content.Intent
 import android.util.Log
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
-import android.widget.ViewFlipper
 import androidx.core.net.toUri
 
 
@@ -81,6 +80,19 @@ class ListRemoteViewsFactory(
     }
 }
 
+private fun setListViewContent(context: Context, views: RemoteViews, appWidgetId: Int, viewIdItemList: Int, viewIdEmpty: Int) {
+    // Set up the intent that starts the StackViewService, which
+    // provides the views for this collection.
+    val intent = Intent(context, ListWidgetService::class.java).apply {
+        // Add the widget ID to the intent extras.
+        putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+        data = toUri(Intent.URI_INTENT_SCHEME).toUri()
+    }
+
+    views.setRemoteAdapter(viewIdItemList, intent)
+    views.setEmptyView(viewIdItemList, viewIdEmpty)
+}
+
 const val ACTION_LEFTBUTTON = "WIDGET_LEFTBUTTON_CLICKED"
 const val ACTION_RIGHTBUTTON = "WIDGET_RIGHTBUTTON_CLICKED"
 
@@ -96,16 +108,12 @@ class ComicsWidget : AppWidgetProvider() {
 
         if (intent?.action == ACTION_LEFTBUTTON) {
             val views = RemoteViews(context.packageName, R.layout.comics_widget).apply {
-                setInt(R.id.appwidget_itemlist_flipper, "setInAnimation", R.anim.in_from_left)
-                setInt(R.id.appwidget_itemlist_flipper, "setOutAnimation", R.anim.out_to_right)
                 setDisplayedChild(R.id.appwidget_itemlist_flipper, 0)
             }
 
             updateWidget(context, views)
         } else if (intent?.action == ACTION_RIGHTBUTTON) {
             val views = RemoteViews(context.packageName, R.layout.comics_widget).apply {
-//                setInt(R.id.appwidget_itemlist_flipper, "setInAnimation", R.anim.in_from_right)
-//                setInt(R.id.appwidget_itemlist_flipper, "setOutAnimation", R.anim.out_to_left)
                 setDisplayedChild(R.id.appwidget_itemlist_flipper, 2)
             }
 
@@ -122,13 +130,6 @@ class ComicsWidget : AppWidgetProvider() {
     ) {
         // There may be multiple widgets active, so update all of them
         for (appWidgetId in appWidgetIds) {
-            // Set up the intent that starts the StackViewService, which
-            // provides the views for this collection.
-            val intent = Intent(context, ListWidgetService::class.java).apply {
-                // Add the widget ID to the intent extras.
-                putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
-                data = toUri(Intent.URI_INTENT_SCHEME).toUri()
-            }
 
             val leftButtonIntent = Intent(context, ComicsWidget::class.java).apply {
                 action = ACTION_LEFTBUTTON
@@ -148,18 +149,10 @@ class ComicsWidget : AppWidgetProvider() {
                 rightButtonIntent,
                 PendingIntent.FLAG_IMMUTABLE
             )
-            // Instantiate the RemoteViews object for the widget layout.
             val views = RemoteViews(context.packageName, R.layout.comics_widget).apply {
-                // Set up the RemoteViews object to use a RemoteViews adapter.
-                // This adapter connects to a RemoteViewsService through the
-                // specified intent.
-                // This is how you populate the data.
-                setRemoteAdapter(R.id.appwidget_itemlist, intent)
-
-                // The empty view is displayed when the collection has no items.
-                // It must be in the same layout used to instantiate the
-                // RemoteViews object.
-                setEmptyView(R.id.appwidget_itemlist, R.id.appwidget_empty_view)
+                setListViewContent(context, this, appWidgetId, R.id.appwidget_itemlist_prev, R.id.appwidget_empty_view_prev)
+                setListViewContent(context, this, appWidgetId, R.id.appwidget_itemlist, R.id.appwidget_empty_view)
+                setListViewContent(context, this, appWidgetId, R.id.appwidget_itemlist_next, R.id.appwidget_empty_view_next)
 
                 setImageViewResource(R.id.widget_button_left, R.drawable.ic_button_left)
                 setOnClickPendingIntent(R.id.widget_button_left, leftButtonPendingIntent)
