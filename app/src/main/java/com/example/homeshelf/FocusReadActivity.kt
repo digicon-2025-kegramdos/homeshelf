@@ -229,7 +229,7 @@ fun ComicScreen(comicId: String, modifier: Modifier = Modifier, isFocusMode: Boo
                     IconButton(onClick = toggleFavorite) {
                         Icon(
                             imageVector = if (isFavorite) Icons.Filled.Star else Icons.Outlined.StarOutline,
-                            contentDescription = if (isFavorite) "お気に入りから削除" else "お気に入りに追加",
+                            contentDescription = if (isFavorite) "本棚から削除" else "本棚に追加",
                             tint = if (isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }

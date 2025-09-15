@@ -138,7 +138,7 @@ fun OrderedFavoriteSettingsScreen(modifier: Modifier = Modifier) {
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
-            TopAppBar(title = { Text("お気に入り順序設定") })
+            TopAppBar(title = { Text("本棚の設定") })
         }
     ) { innerPadding ->
         Column(
@@ -148,7 +148,7 @@ fun OrderedFavoriteSettingsScreen(modifier: Modifier = Modifier) {
         ) {
             if (favoriteComics.isEmpty()) {
                 Text(
-                    text = "お気に入りの漫画はありません。",
+                    text = "本棚は空です。",
                     style = MaterialTheme.typography.bodyLarge,
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 )
@@ -204,7 +204,7 @@ fun EditableFavoriteListItem(
             }
             Spacer(modifier = Modifier.width(8.dp))
             IconButton(onClick = onRemove) {
-                Icon(Icons.Filled.Delete, contentDescription = "お気に入りから削除", tint = MaterialTheme.colorScheme.error)
+                Icon(Icons.Filled.Delete, contentDescription = "本棚から削除", tint = MaterialTheme.colorScheme.error)
             }
         }
     }
@@ -225,11 +225,11 @@ fun OrderedFavoriteSettingsScreenPreview() {
             mutableStateListOf("comic2", "comic1", "comic4")
         }
         Scaffold(
-            topBar = { TopAppBar(title = { Text("お気に入り順序設定 (Preview)") }) }
+            topBar = { TopAppBar(title = { Text("本棚の設定 (Preview)") }) }
         ) { padding ->
             Column(Modifier.padding(padding).padding(16.dp)) {
                 if (sampleFavoriteIds.isEmpty()) {
-                    Text("お気に入りの漫画はありません。")
+                    Text("本棚は空です。")
                 } else {
                     LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         itemsIndexed(sampleFavoriteIds, key = { _, id -> id}) { index, comicId ->
