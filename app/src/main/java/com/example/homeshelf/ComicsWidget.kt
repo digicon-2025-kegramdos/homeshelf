@@ -6,11 +6,17 @@ import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.os.Bundle
 import android.util.Log
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
 import androidx.core.net.toUri
 
+const val EXTRA_ITEM = "com.example.homeshelf.EXTRA_ITEM"
+
+const val ACTION_LEFTBUTTON = "WIDGET_LEFTBUTTON_CLICKED"
+const val ACTION_RIGHTBUTTON = "WIDGET_RIGHTBUTTON_CLICKED"
+const val ACTION_LISTITEM_TAPPED = "WIDGET_LISTITEM_TAPPED"
 
 class ListWidgetService : RemoteViewsService() {
 
@@ -49,6 +55,18 @@ class ListRemoteViewsFactory(
         // and set the text based on the position.
         return RemoteViews(context.packageName, R.layout.widget_comiclist_item).apply {
             setTextViewText(R.id.widget_comiclist_item_text, mWidgetItems[position])
+
+            // Set a fill-intent to fill in the pending intent template.
+            // that is set on the collection view in StackWidgetProvider.
+            val fillInIntent = Intent().apply {
+                Bundle().also { extras ->
+                    extras.putInt(EXTRA_ITEM, position)
+                    putExtras(extras)
+                }
+            }
+            // Make it possible to distinguish the individual on-click
+            // action of a given item.
+            setOnClickFillInIntent(R.id.widget_comiclist_item_root, fillInIntent)
         }
     }
 
@@ -93,16 +111,11 @@ private fun setListViewContent(context: Context, views: RemoteViews, appWidgetId
     views.setEmptyView(viewIdItemList, viewIdEmpty)
 }
 
-const val ACTION_LEFTBUTTON = "WIDGET_LEFTBUTTON_CLICKED"
-const val ACTION_RIGHTBUTTON = "WIDGET_RIGHTBUTTON_CLICKED"
-
 /**
  * Implementation of App Widget functionality.
  */
 class ComicsWidget : AppWidgetProvider() {
     override fun onReceive(context: Context?, intent: Intent?) {
-        super.onReceive(context, intent)
-
         if(context == null)
             return
 
@@ -117,6 +130,16 @@ class ComicsWidget : AppWidgetProvider() {
                 setDisplayedChild(R.id.appwidget_itemlist_flipper, 2)
             }
 
+            updateWidget(context, views)
+        } else if (intent?.action == ACTION_LISTITEM_TAPPED) {
+            val appWidgetId: Int = intent.getIntExtra(
+                AppWidgetManager.EXTRA_APPWIDGET_ID,
+                AppWidgetManager.INVALID_APPWIDGET_ID)
+            val viewIndex: Int = intent.getIntExtra(EXTRA_ITEM, -1)
+
+            Log.i("MyApp", "tapped: ${appWidgetId} ${viewIndex}")
+
+            val views = RemoteViews(context.packageName, R.layout.comics_widget)
             updateWidget(context, views)
         } else {
             super.onReceive(context, intent)
@@ -149,6 +172,26 @@ class ComicsWidget : AppWidgetProvider() {
                 rightButtonIntent,
                 PendingIntent.FLAG_IMMUTABLE
             )
+
+            // This section makes it possible for items to have individualized
+            // behavior. It does this by setting up a pending intent template.
+            // Individuals items of a collection can't set up their own pending
+            // intents. Instead, the collection as a whole sets up a pending
+            // intent template, and the individual items set a fillInIntent
+            // to create unique behavior on an item-by-item basis.
+            val listSelectPendingIntent: PendingIntent = Intent(
+                context,
+                ComicsWidget::class.java
+            ).run {
+                // Set the action for the intent.
+                // When the user touches a particular view, it has the effect of
+                // broadcasting TOAST_ACTION.
+                action = ACTION_LISTITEM_TAPPED
+                putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+                data = toUri(Intent.URI_INTENT_SCHEME).toUri()
+
+                PendingIntent.getBroadcast(context, 0, this, PendingIntent.FLAG_IMMUTABLE)
+            }
             val views = RemoteViews(context.packageName, R.layout.comics_widget).apply {
                 setListViewContent(context, this, appWidgetId, R.id.appwidget_itemlist_prev, R.id.appwidget_empty_view_prev)
                 setListViewContent(context, this, appWidgetId, R.id.appwidget_itemlist, R.id.appwidget_empty_view)
@@ -161,6 +204,9 @@ class ComicsWidget : AppWidgetProvider() {
                 setOnClickPendingIntent(R.id.widget_button_right, rightButtonPendingIntent)
 
                 setDisplayedChild(R.id.appwidget_itemlist_flipper, 1)
+                setPendingIntentTemplate(R.id.appwidget_itemlist_prev, listSelectPendingIntent)
+                setPendingIntentTemplate(R.id.appwidget_itemlist, listSelectPendingIntent)
+                setPendingIntentTemplate(R.id.appwidget_itemlist_next, listSelectPendingIntent)
             }
 
             appWidgetManager.updateAppWidget(appWidgetId, views)
