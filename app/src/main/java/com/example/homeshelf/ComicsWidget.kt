@@ -60,20 +60,23 @@ class ListRemoteViewsFactory(
     }
 
     override fun getCount(): Int {
-        return mCount
+        val titles = getFavoriteComicTitles(context)
+        return titles.size
     }
 
     override fun getViewAt(position: Int): RemoteViews {
+        val titles = getFavoriteComicTitles(context)
+
         // Construct a remote views item based on the widget item XML file
         // and set the text based on the position.
         return RemoteViews(context.packageName, R.layout.widget_comiclist_item).apply {
-            setTextViewText(R.id.widget_comiclist_item_text, mWidgetItems[position])
+            setTextViewText(R.id.widget_comiclist_item_text, titles.get(position))
 
             // Set a fill-intent to fill in the pending intent template.
             // that is set on the collection view in StackWidgetProvider.
             val fillInIntent = Intent().apply {
                 Bundle().also { extras ->
-                    extras.putInt(EXTRA_ITEM, position)
+                    extras.putString(EXTRA_ITEM, "comic${position + 1}")
                     putExtras(extras)
                 }
             }
@@ -148,13 +151,14 @@ class ComicsWidget : AppWidgetProvider() {
             val appWidgetId: Int = intent.getIntExtra(
                 AppWidgetManager.EXTRA_APPWIDGET_ID,
                 AppWidgetManager.INVALID_APPWIDGET_ID)
-            val viewIndex: Int = intent.getIntExtra(EXTRA_ITEM, -1)
-
-            val intent = Intent(context, FocusReadActivity::class.java).apply {
-                putExtra("COMIC_ID", "comic${viewIndex}")
-                setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            val comicId: String? = intent.getStringExtra(EXTRA_ITEM)
+            if(comicId != null) {
+                val intent = Intent(context, FocusReadActivity::class.java).apply {
+                    putExtra("COMIC_ID", comicId)
+                    setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                context.startActivity(intent)
             }
-            context.startActivity(intent)
         } else {
             super.onReceive(context, intent)
         }
