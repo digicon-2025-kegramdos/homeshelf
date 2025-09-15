@@ -13,6 +13,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
@@ -21,14 +22,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.StarOutline
+import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -36,7 +36,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment // Added for Alignment.BottomCenter
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -62,7 +62,7 @@ private fun loadOrderedFavoritesFocus(context: Context): MutableList<String> {
             for (i in 0 until jsonArray.length()) {
                 list.add(jsonArray.getString(i))
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) { // Changed e to _
             // Log error or handle
         }
     }
@@ -88,10 +88,11 @@ class FocusReadActivity : ComponentActivity() {
 
         setContent {
             HomeShelfTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                // The Scaffold in FocusReadActivity provides overall structure and padding for edge-to-edge
+                Scaffold(modifier = Modifier.fillMaxSize()) { outerPadding ->
                     ComicScreen(
                         comicId = comicId, // Pass comicId instead of name for clarity
-                        modifier = Modifier.padding(innerPadding),
+                        modifier = Modifier.padding(outerPadding), // Pass padding to ComicScreen
                         isFocusMode = false
                     )
                 }
@@ -150,10 +151,8 @@ fun ComicScreen(comicId: String, modifier: Modifier = Modifier, isFocusMode: Boo
         favoriteList.addAll(currentFavorites)
     }
 
-    Box(
-        modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
+    // ComicScreen's root is now a Box. It applies the modifier from FocusReadActivity (outerPadding)
+    Box(modifier = modifier.fillMaxSize()) {
         HorizontalPager(
             state = pagerState,
             modifier = Modifier
@@ -172,16 +171,21 @@ fun ComicScreen(comicId: String, modifier: Modifier = Modifier, isFocusMode: Boo
                 contentScale = ContentScale.Fit
             )
         }
-    }
-    AnimatedVisibility(
-        visible = isOverlayVisible,
-        modifier = Modifier,
-        enter = fadeIn(),
-        exit = fadeOut()
-    ) {
-        TopAppBar(
-            title = { Text(text = "$comicId (${pagerState.currentPage + 1}/${pages.size})") }, // Show comicId in title
-            actions = {
+
+        // AnimatedVisibility is aligned to the bottom of the parent Box
+        AnimatedVisibility(
+            visible = isOverlayVisible,
+            modifier = Modifier.align(Alignment.BottomCenter), // Align to the bottom of the Box
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            BottomAppBar(
+                containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f)
+            ) { // This is RowScope
+                Text(text = "$comicId (${pagerState.currentPage + 1}/${pages.size})") // Show comicId in title
+
+                Spacer(Modifier.weight(1f)) // Pushes subsequent items to the end
+
                 if (!isFocusMode) {
                     IconButton(onClick = {
                         val urlToShare = "https://example.com/comic/$comicId" // Example share URL
@@ -203,11 +207,8 @@ fun ComicScreen(comicId: String, modifier: Modifier = Modifier, isFocusMode: Boo
                         )
                     }
                 }
-            },
-            colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f)
-            )
-        )
+            }
+        }
     }
 }
 

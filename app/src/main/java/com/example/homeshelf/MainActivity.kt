@@ -7,6 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.annotation.DrawableRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -41,10 +42,10 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            HomeShelfTheme {
+            HomeShelfTheme(dynamicColor = false) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = Color.White
+                    color = Color.Black
                 ) {
                     MainScreen()
                 }
@@ -73,13 +74,13 @@ fun MainScreen(modifier: Modifier = Modifier) {
 
     Scaffold(
         bottomBar = {
-            BottomAppBar {
+            BottomAppBar(containerColor = Color.Black) {
                 Spacer(Modifier.weight(1f))
                 IconButton(onClick = {
                     val intent = Intent(context, SettingsActivity::class.java)
                     context.startActivity(intent)
                 }) {
-                    Icon(Icons.Filled.Settings, contentDescription = "Settings")
+                    Icon(Icons.Filled.Settings, contentDescription = "Settings",modifier=modifier.size(36.dp))
                 }
             }
         }
@@ -93,7 +94,7 @@ fun MainScreen(modifier: Modifier = Modifier) {
             horizontalAlignment = Alignment.CenterHorizontally // Center content horizontally
         ) {
             Text(
-                "HomeShelf",
+                "コミコミコミック",
                 style = MaterialTheme.typography.headlineLarge,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(24.dp)
@@ -116,7 +117,7 @@ fun MainScreen(modifier: Modifier = Modifier) {
                             }
                     )
                     Text(text = thumbnail.title, fontSize = 20.sp)
-                    Text(text = thumbnail.author, color = Color.DarkGray)
+                    Text(text = thumbnail.author, color = Color.LightGray)
                 }
             }
         }
@@ -125,13 +126,18 @@ fun MainScreen(modifier: Modifier = Modifier) {
 
 
 @Preview(
-    showBackground = true,
+    showBackground = false,
     widthDp = 480,
     heightDp = 960
 )
 @Composable
 fun MainPreview() {
-    HomeShelfTheme {
-        MainScreen()
+    HomeShelfTheme(dynamicColor = false) {
+        Surface(
+            modifier = Modifier.fillMaxSize().background(Color.Black),
+            color = Color.Black
+        ) {
+            MainScreen()
+        }
     }
 }
