@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.OnBackPressedCallback // Added import
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.AnimatedVisibility
@@ -84,6 +85,21 @@ class FocusReadActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        // Handle back press to go to home screen
+        val onBackPressedCallback = object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (!isTaskRoot) {
+                    // If not the root of the task (e.g., launched on top of MainActivity from widget),
+                    // finish the entire task to go to the home screen.
+                    finishAffinity()
+                } else {
+                    // If it is the root, normal finish will also go to home.
+                    finish()
+                }
+            }
+        }
+        onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
 
         val comicId =
             intent.getStringExtra("COMIC_ID") ?: "comic1" // Default comicId if not provided
