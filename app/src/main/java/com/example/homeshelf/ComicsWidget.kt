@@ -27,6 +27,7 @@ fun updateComicWidget(context: Context) {
         action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
         putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, appWidgetIds)
     }
+    Log.i("MyApp","updateComicWidget()")
     context.sendBroadcast(intent)
 }
 
