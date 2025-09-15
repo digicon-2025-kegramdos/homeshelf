@@ -249,4 +249,5 @@ private fun updateWidget(context: Context, views: RemoteViews) {
         Log.i("MyApp", appWidgetId.toString())
         appWidgetManager.updateAppWidget(appWidgetId, views)
     }
+    Log.i("MyApp","ok")
 }

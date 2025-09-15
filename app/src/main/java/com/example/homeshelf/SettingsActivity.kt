@@ -100,6 +100,7 @@ fun OrderedFavoriteSettingsScreen(modifier: Modifier = Modifier) {
         favoriteComics.clear()
         favoriteComics.addAll(newList)
         saveOrderedFavorites(context, favoriteComics)
+        updateComicWidget(context)
     }
 
     val onMoveUp = { index: Int ->

@@ -76,6 +76,7 @@ private fun saveOrderedFavoritesFocus(context: Context, orderedList: List<String
     sharedPrefs.edit {
         putString(FOCUS_ACTIVITY_KEY_FAVORITE_COMICS_ORDERED, jsonArray.toString())
     }
+    updateComicWidget(context)
 }
 
 
