@@ -70,6 +70,7 @@ class ListRemoteViewsFactory(
         // Construct a remote views item based on the widget item XML file
         // and set the text based on the position.
         return RemoteViews(context.packageName, R.layout.widget_comiclist_item).apply {
+            setImageViewResource(R.id.widget_comiclist_item_icon, R.drawable.ic_book)
             setTextViewText(R.id.widget_comiclist_item_text, titles.get(position))
 
             // Set a fill-intent to fill in the pending intent template.

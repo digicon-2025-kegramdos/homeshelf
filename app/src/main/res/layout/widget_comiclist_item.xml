@@ -8,7 +8,7 @@
     android:theme="@style/Theme.HomeShelf.AppWidgetContainer">
 
     <ImageView
-        android:id="@+id/imageView"
+        android:id="@+id/widget_comiclist_item_icon"
         android:layout_width="38dp"
         android:layout_height="38dp"
         android:layout_weight="0"
