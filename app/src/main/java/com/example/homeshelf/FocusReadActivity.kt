@@ -84,7 +84,8 @@ class FocusReadActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        val comicId = intent.getStringExtra("COMIC_ID") ?: "comic1" // Default comicId if not provided
+        val comicId =
+            intent.getStringExtra("COMIC_ID") ?: "comic1" // Default comicId if not provided
 
         setContent {
             HomeShelfTheme {
@@ -106,7 +107,12 @@ class FocusReadActivity : ComponentActivity() {
 fun ComicScreen(comicId: String, modifier: Modifier = Modifier, isFocusMode: Boolean = false) {
     val comicPagesMap = mapOf(
         "comic1" to listOf(R.drawable.comic_1_1),
-        "comic2" to listOf(R.drawable.comic_2_1, R.drawable.comic_2_2, R.drawable.comic_2_3, R.drawable.comic_2_4),
+        "comic2" to listOf(
+            R.drawable.comic_2_1,
+            R.drawable.comic_2_2,
+            R.drawable.comic_2_3,
+            R.drawable.comic_2_4
+        ),
         "comic3" to listOf(R.drawable.comic_3_1),
         "comic4" to listOf(R.drawable.comic_4_1, R.drawable.comic_4_2, R.drawable.comic_4_3)
     )
