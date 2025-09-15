@@ -94,7 +94,7 @@ class FocusReadActivity : ComponentActivity() {
                     ComicScreen(
                         comicId = comicId, // Pass comicId instead of name for clarity
                         modifier = Modifier.padding(outerPadding), // Pass padding to ComicScreen
-                        isFocusMode = false
+                        isFocusMode = true
                     )
                 }
             }

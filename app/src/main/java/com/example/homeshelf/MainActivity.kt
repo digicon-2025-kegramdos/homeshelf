@@ -110,7 +110,7 @@ fun MainScreen(modifier: Modifier = Modifier) {
                             .size(width = 400.dp, height = 200.dp) // Adjust size as needed
                             .padding(vertical = 8.dp) // Add some vertical spacing
                             .clickable {
-                                val intent = Intent(context, FocusReadActivity::class.java).apply {
+                                val intent = Intent(context, ReadActivity::class.java).apply {
                                     putExtra("COMIC_ID", thumbnail.comicId) // comicIdをIntentに追加
                                 }
                                 context.startActivity(intent)
