@@ -137,10 +137,11 @@ class ComicsWidget : AppWidgetProvider() {
                 AppWidgetManager.INVALID_APPWIDGET_ID)
             val viewIndex: Int = intent.getIntExtra(EXTRA_ITEM, -1)
 
-            Log.i("MyApp", "tapped: ${appWidgetId} ${viewIndex}")
-
-            val views = RemoteViews(context.packageName, R.layout.comics_widget)
-            updateWidget(context, views)
+            val intent = Intent(context, FocusReadActivity::class.java).apply {
+                putExtra("COMIC_ID", "comic1") // comicIdをIntentに追加
+                setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            context.startActivity(intent)
         } else {
             super.onReceive(context, intent)
         }
